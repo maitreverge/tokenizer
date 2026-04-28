@@ -43,7 +43,7 @@ contract Coin {
     // Sends an amount of newly created coins to an address
     // Can only be called by the contract creator
     function mint(address receiver, uint amount) public {
-        require(msg.sender == minter);
+        require(msg.sender == minter, "Only minter can mint");
         balances[receiver] += amount;
     }
 
@@ -56,6 +56,7 @@ contract Coin {
     // from any caller to an address
     function send(address receiver, uint amount) public {
         require(amount <= balances[msg.sender], InsufficientBalance(amount, balances[msg.sender]));
+        // ! ALWAYS DEDUCT before CREDIT
         balances[msg.sender] -= amount;
         balances[receiver] += amount;
         emit Sent(msg.sender, receiver, amount);

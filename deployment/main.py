@@ -2,14 +2,27 @@
 _module_doc_
 """
 
-from web3 import AsyncWeb3, Web3
-import json
+from web3 import Web3
 import os
 import sys
 from utils import print_w3_logs
 from utils import is_virtual_env_sys
 from solcx import install_solc, compile_source
 import solcx
+from eth_account import Account
+
+from dotenv import load_dotenv
+
+from eth_account import Account
+from eth_account.signers.local import LocalAccount
+from web3.middleware import SignAndSendRawMiddlewareBuilder
+
+load_dotenv()
+
+SEPOLIA_ENTRYPOINT = os.getenv("SEPOLIA_ENTRYPOINT")
+TEST_CONTRACT = os.getenv("TEST_CONTRACT")
+MY_PRIVATE_KEY = os.getenv("MY_PRIVATE_KEY")
+MY_PUBLIC_KEY = os.getenv("MY_PUBLIC_KEY")
 
 
 def pass_init_checks() -> bool:
@@ -26,18 +39,14 @@ def install_contract_compiler() -> None:
     """
     _Function to install the `py-solc-x` contract compiler_
     """
-    # try:
-    #     print(f"=== Checking Smart Contract Compiler ===")
-    #     solcx.get_solc_version()
-    #     print(f"=== Smart Contract Compiler already installed ===")
-    # except Exception as e:
-    #     print(f"=== Smart Contract Compiler not installed. Installing... ==")
-    #     install_solc(version='latest')
-    #     print(f"=== Installed Contract Compiler ===")
-    # install_solc()
-    install_solc(version='0.8.35')
-    solcx.set_solc_version("0.8.35")
-    # print(f"Installable version : \n{solcx.get_installable_solc_versions()}")
+    try:
+        print(f"=== Checking Smart Contract Compiler ===")
+        assert solcx.get_solc_version() == ["<Version('0.8.35')>"]
+        print(f"=== Smart Contract Compiler already installed ===")
+    except Exception as e:
+        print(f"=== Smart Contract Compiler not installed. Installing... ==")
+        install_solc(version="0.8.35")
+        print(f"=== Installed Contract Compiler ===")
     print(f"Installed version = {solcx.get_installed_solc_versions()}")
 
 
@@ -53,32 +62,39 @@ def upload_contract(w3: Web3) -> None:
         content = test_contract.read()
         print(f"CONTRACT OUTPUT : \n\n===\n{content}\n===\n")
 
-        # compiled_contract = compile_source(content,
-        #     output_values=["abi", "bin"],
-        #     solc_version='0.8.35'
-        # )
-        oz_path = os.path.abspath("./node_modules")
+        openzeppelin_path = os.path.abspath("./node_modules")
 
         compiled_contract = compile_source(
-            """
-            // SPDX-License-Identifier: GPL-3.0
-            pragma solidity ^0.8.35;
-
-            import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-
-            // Base contract inherits fromthe standart ERC20 object
-            contract Token_42_Base is ERC20 {
-                constructor() ERC20("Token_42_Base", "T4B") {
-                    _mint(msg.sender, 4242);
-                }
-            }
-            """ ,
+            content,
             output_values=["abi", "bin"],
-            solc_version='0.8.35',
-            import_remappings=[f"@openzeppelin/={oz_path}/@openzeppelin/"],
-            allow_paths=[oz_path]
+            solc_version="0.8.35",
+            import_remappings=[
+                f"@openzeppelin/={openzeppelin_path}/@openzeppelin/"
+            ],
+            allow_paths=[openzeppelin_path],
         )
-        print(f"COMPIILED : {compiled_contract}")
+
+        # retrieve the contract interface
+        contract_id, contract_interface = compiled_contract.popitem()
+
+        # get bytecode / bin
+        bytecode = contract_interface["bin"]
+
+        # get abi
+        abi = contract_interface["abi"]
+
+        account: LocalAccount = Account.from_key(MY_PRIVATE_KEY)
+        w3.middleware_onion.inject(SignAndSendRawMiddlewareBuilder.build(account), layer=0)
+        w3.eth.default_account = account.address
+
+        Greeter = w3.eth.contract(abi=abi, bytecode=bytecode)
+
+        tx_hash = Greeter.constructor().transact()
+        tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+
+        print(tx_receipt)
+
+        # print(f"COMPIILED : {compiled_contract}")
 
 
 def main() -> None:
@@ -89,9 +105,7 @@ def main() -> None:
         sys.exit(1)
 
     try:
-        w3 = Web3(
-            Web3.HTTPProvider("https://ethereum-sepolia-rpc.publicnode.com")
-        )
+        w3 = Web3(Web3.HTTPProvider(SEPOLIA_ENTRYPOINT))
         assert (
             w3.is_connected()
         ), "Web3 node failed. Please check the node connector and try again"

@@ -4,3 +4,4 @@ speedrun_test/
 node_modules/
 __pycache__/
 .mypy_cache/
+deployment/.env

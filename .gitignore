@@ -1,3 +1,6 @@
 tokenizer.pdf
 speedrun_test/
 .venv/
+node_modules/
+__pycache__/
+.mypy_cache/

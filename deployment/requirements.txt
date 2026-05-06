@@ -3,3 +3,5 @@ requests
 web3[tester]
 py-solc-x
 dotenv
+rich
+readchar

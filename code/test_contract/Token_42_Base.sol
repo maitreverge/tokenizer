@@ -5,7 +5,8 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 // Base contract inherits fromthe standart ERC20 object
 contract Token_42_Base is ERC20 {
-      constructor() ERC20("Token_42_Base", "T4B") {
-        _mint(msg.sender, 4242);
+      constructor() ERC20("Token_hello", "T4H_Coin") {
+        // de base c'est en wei (Gas Gwei = Gwei)
+        _mint(msg.sender, 142 * 10**18);
     }
 }

@@ -9,4 +9,5 @@ contract Token_42_Base is ERC20 {
         // de base c'est en wei (Gas Gwei = Gwei)
         _mint(msg.sender, 142 * 10**18);
     }
+    // fonction burn pour bruler des tokens
 }

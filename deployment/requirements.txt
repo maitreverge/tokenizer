@@ -1,3 +1,9 @@
+# Base checkers
+black
+mypy
+flake8
+pylint
+# Project imports
 web3
 requests
 web3[tester]
@@ -5,3 +11,5 @@ py-solc-x
 dotenv
 rich
 readchar
+pyperclip
+types-pyperclip

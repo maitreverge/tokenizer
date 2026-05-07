@@ -1,3 +1,7 @@
+import sys
+import os
+import readchar
+
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
@@ -5,16 +9,10 @@ from rich.text import Text
 from rich import box
 from rich.live import Live
 from rich.layout import Layout
-import readchar
 
 from dotenv import load_dotenv
-import os
-import sys
 from web3 import Web3
-from typing import Any
-
 from pyperclip import copy as clipboard_cpy
-
 from eth_account import Account
 
 load_dotenv()
@@ -26,6 +24,10 @@ console = Console()
 
 
 class Wallet:
+    """
+    A class representing a cryptocurrency wallet.
+    """
+
     def __init__(self, key: str | None = None) -> None:
 
         if not key:
@@ -38,42 +40,103 @@ class Wallet:
         self._sepolia_balance_wei: int = self._fetch_balance()
 
     def _fetch_balance(self) -> int:
-        return self._entrypoint_obj.eth.get_balance(self.get_public_key())
+        """
+        Fetches the balance of the wallet in Wei.
+
+        Returns:
+            int: The balance in Wei.
+        """
+        # web3.get_balance expects an Address/ChecksumAddress;
+        checksum_addr = self._entrypoint_obj.to_checksum_address(
+            self.get_public_key()
+        )
+        return self._entrypoint_obj.eth.get_balance(checksum_addr)
 
     def refresh_balance(self) -> None:
+        """
+        Refreshes the balance of the wallet.
+
+        Returns:
+            None
+        """
         self._sepolia_balance_wei = self._fetch_balance()
 
     @property
     def sepolia_balance(self) -> float:
+        """
+        Fetches the balance of the wallet in SepoliaETH.
+
+        Returns:
+            float: The balance in SepoliaETH.
+        """
         return round((self._sepolia_balance_wei / 10**18), 4)
 
     def get_public_key(self) -> str:
-        return self.account.address
+        """
+        Fetches the public key of the wallet.
+
+        Returns:
+            str: The public key.
+        """
+        return str(self.account.address)
 
     def get_private_key(self) -> str:
-        return self.account.key.hex()
+        """
+        Fetches the private key of the wallet.
+
+        Returns:
+            str: The private key.
+        """
+        return str(self.account.key.hex())
 
 
-def create_wallet(wallets: list[Wallet]):
+def create_wallet(wallets: list[Wallet]) -> str:
+    """
+    Creates a new wallet and adds it to the list.
+
+    Args:
+        wallets (list[Wallet]): The list of existing wallets.
+
+    Returns:
+        str: A message indicating the result of the operation.
+    """
     new_wallet = Wallet()
 
     if WALLETS_FILE is None:
         return "[red]WALLETS_FILE is not configured.[/red]"
 
-    with open(WALLETS_FILE, "a") as wallet_file:
+    with open(WALLETS_FILE, "a", encoding="utf-8") as wallet_file:
         wallet_file.write(f"{new_wallet.get_private_key()}\n")
     wallets.append(new_wallet)
     return "[bold green]✓ Wallet Created.[/bold green]"
 
 
-def refresh_balance(wallets: list[Wallet]):
+def refresh_balance(wallets: list[Wallet]) -> str:
+    """
+    Refreshes the balance of all wallets in the list.
+
+    Args:
+        wallets (list[Wallet]): The list of existing wallets.
+
+    Returns:
+        str: A message indicating the result of the operation.
+    """
     for wallet in wallets:
         wallet.refresh_balance()
     return "[bold green]✓ Wallets balance refreshed [/bold green]"
 
 
 def copy_adress(wallets: list[Wallet], cmd: str) -> str:
+    """
+    Copies the public address of a wallet to the clipboard.
 
+    Args:
+        wallets (list[Wallet]): The list of existing wallets.
+        cmd (str): The command string containing the wallet index.
+
+    Returns:
+        str: A message indicating the result of the operation.
+    """
     nb_wallets = len(wallets)
 
     cmd, _index = cmd.split("-")
@@ -89,7 +152,16 @@ def copy_adress(wallets: list[Wallet], cmd: str) -> str:
 
 
 def copy_key(wallets: list[Wallet], cmd: str) -> str:
+    """
+    Copies the private key of a wallet to the clipboard.
 
+    Args:
+        wallets (list[Wallet]): The list of existing wallets.
+        cmd (str): The command string containing the wallet index.
+
+    Returns:
+        str: A message indicating the result of the operation.
+    """
     nb_wallets = len(wallets)
 
     cmd, _index = cmd.split("-")
@@ -105,13 +177,21 @@ def copy_key(wallets: list[Wallet], cmd: str) -> str:
 
 
 def build_table(wallets: list[Wallet]) -> Table:
+    """
+    Builds a table displaying wallet information.
+
+    Args:
+        wallets (list[Wallet]): The list of existing wallets.
+
+    Returns:
+        Table: The constructed table.
+    """
     table = Table(
         box=box.SIMPLE_HEAD,
         show_header=True,
         header_style="bold cyan",
         expand=True,
     )
-    # table.add_column("Wallet Name", style="bold white", min_width=14)
     table.add_column("Number", style="dim", min_width=8, justify="center")
     table.add_column(
         "Public Address", style="cyan", min_width=20, justify="center"
@@ -123,19 +203,29 @@ def build_table(wallets: list[Wallet]) -> Table:
     if len(wallets) == 0:
         table.add_row(
             "",
-            "[bold red]NO WALLET AVAILABLE. SELECT 1 TO CREATE A WALLET.[/bold red]",
+            "[bold red]NO WALLET AVAILABLE.[/bold red]",
             "",
         )
     else:
         for i, w in enumerate(wallets):
-            # table.add_row(str(i), w.get_public_key(), str(0))
             table.add_row(str(i), w.get_public_key(), str(w.sepolia_balance))
     return table
 
 
 def build_layout(
-    wallets, input_buffer: str = "", status_msg: str = ""
+    wallets: list[Wallet], input_buffer: str = "", status_msg: str = ""
 ) -> Layout:
+    """
+    Builds the layout for the application.
+
+    Args:
+        wallets (list[Wallet]): The list of existing wallets.
+        input_buffer (str, optional): The input buffer for user input.
+        status_msg (str, optional): The status message to display.
+
+    Returns:
+        Layout: The constructed layout.
+    """
     layout = Layout()
     layout.split_column(
         Layout(name="table", ratio=2),
@@ -152,7 +242,7 @@ def build_layout(
 
     menu_text = Text()
 
-    ## ! Classic commands
+    # ! Classic commands
     menu_text.append("Type:\n\n", style="bold white")
     menu_text.append("  1", style="bold yellow")
     menu_text.append(". Create a wallet\n", style="white")
@@ -161,7 +251,7 @@ def build_layout(
     menu_text.append("  3", style="bold yellow")
     menu_text.append(". Quit Program\n\n", style="white")
 
-    ## ! Copy commands
+    # ! Copy commands
     menu_text.append("Copy Wallet Attributes:\n\n", style="bold white")
     menu_text.append("  Type `adr-0`", style="bold yellow")
     menu_text.append(
@@ -172,7 +262,7 @@ def build_layout(
         ". Copies the private key of wallet `0`\n\n", style="white"
     )
 
-    ## Return message from commands
+    # Return message from commands
     if status_msg:
         menu_text.append("  → ", style="dim")
         menu_text.append_text(Text.from_markup(status_msg))
@@ -191,21 +281,32 @@ def build_layout(
     return layout
 
 
-def load_wallets(wallets_json) -> list[Wallet]:
-    # def load_wallets(wallets_json) -> None:
-    result = list()
+def load_wallets(wallets_file_path: str | None = None) -> list[Wallet]:
+    """
+    Loads wallets from a file.
 
-    with open(wallets_json, "r") as wallets:
+    Args:
+        wallets_file_path (str | None, optional): The path to the file
+        containing wallet keys. Defaults to None.
+
+    Returns:
+        list[Wallet]: The list of loaded wallets.
+    """
+    result: list[Wallet] = []
+
+    if wallets_file_path is None:
+        return []  # No file path provided, return empty list
+
+    with open(wallets_file_path, "r", encoding="utf-8") as raw_keys:
         # Strip '\n' from realines()
-        wallets = [w.strip("\n") for w in wallets.readlines()]
-        if len(wallets) == 0:
-            return []
-        # print(f"{wallets}")
-        for key in wallets:
+        unstriped_keys = raw_keys.readlines()
+        keys = [k.strip("\n") for k in unstriped_keys]
+        if len(keys) == 0:
+            return result
+
+        for key in keys:
             try:
                 w = Wallet(key)
-                # print(f"Current private key wallet = {w.get_private_key()}")
-                # print(f"Current public adress wallet = {w.get_public_key()}")
             except Exception as e:
                 print(f"Error in init wallets : {e}")
             else:
@@ -223,9 +324,7 @@ def main() -> None:
     try:
         wallets = load_wallets(WALLETS_FILE)
     except Exception as e:
-        print(
-            f"Error while loading wallets from {WALLETS_FILE}.\nError= {e}\nAborting"
-        )
+        print(f"Error loading from {WALLETS_FILE}.\nError= {e}\nAborting")
         sys.exit(1)
 
     with Live(
@@ -241,7 +340,7 @@ def main() -> None:
 
             if key in (readchar.key.CTRL_C, readchar.key.CTRL_D):
                 break
-            elif key in (readchar.key.ENTER, "\n", "\r"):
+            if key in (readchar.key.ENTER, "\n", "\r"):
                 cmd = buf.strip()
                 buf = ""
                 if cmd == "1":

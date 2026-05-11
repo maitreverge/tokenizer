@@ -6,5 +6,10 @@ ETH blockchain has been choosen for history and wide adoption, and because of it
 
 ## Find a public RCP to https://ethereum-sepolia-rpc.publicnode.com/
 
+## BASE REQUIREMENTS
+
+- npm
+- python3
+
 
 

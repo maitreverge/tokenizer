@@ -57,6 +57,7 @@ class ContractState:
         self.gas_used: int = 0
         self.block_number: int = 0
         self.account_address: str = ""
+        self.hello_world_result: str = ""
 
     def connect(self) -> str:
         """Connect to the Sepolia node."""
@@ -147,6 +148,27 @@ class ContractState:
             return "[bold green]✓ Contract deployed successfully![/bold green]"
         except Exception as e:
             return f"[bold red]❌ Deployment error: {e}[/bold red]"
+    
+    def call_hello_world(self) -> str:
+        """Calls the `helloWorld` method from the deployed smart contract."""
+        try:
+            if not self.connected or self.w3 is None:
+                return "[bold red]❌ Not connected to Sepolia. Run step 1 first.[/bold red]"
+            if not self.contract_address:
+                return "[bold red]❌ Contract not deployed. Run step 4 first.[/bold red]"
+            if self.abi is None:
+                return "[bold red]❌ ABI not available. Recompile the contract.[/bold red]"
+
+            contract = self.w3.eth.contract(
+                address=Web3.to_checksum_address(self.contract_address),
+                abi=self.abi,
+            )
+
+            result: str = contract.functions.helloWorld().call()
+            self.hello_world_result = result
+            return f"[bold green]✓ helloWorld() → [/bold green][cyan]{result}[/cyan]"
+        except Exception as e:
+            return f"[bold red]❌ Call error: {e}[/bold red]"
 
 
 def build_status_table(state: ContractState) -> Table:
@@ -226,6 +248,8 @@ def build_layout(
     menu_text.append(". Deploy contract\n", style="white")
     menu_text.append("  5", style="bold yellow")
     menu_text.append(". Run all steps (1→4)\n", style="white")
+    menu_text.append("  6", style="bold yellow")
+    menu_text.append(". Call `helloWorld()` Smart Contract Method\n", style="white")
     menu_text.append("  q", style="bold yellow")
     menu_text.append(". Quit Program\n\n", style="white")
 
@@ -336,6 +360,10 @@ def main() -> None:
                     status = "[yellow]⏳ Running full pipeline...[/yellow]"
                     live.update(build_layout(state, buf, status))
                     status = run_all(state)
+                elif cmd == "6":
+                    status = "[yellow]⏳ Calling helloWord()...[/yellow]"
+                    live.update(build_layout(state, buf, status))
+                    status = state.call_hello_world()
                 elif cmd == "q" or cmd == "quit" or cmd == "exit":
                     break
                 elif cmd == "adr":

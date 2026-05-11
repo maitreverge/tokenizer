@@ -29,7 +29,9 @@ from utils import is_virtual_env_sys
 load_dotenv()
 
 SEPOLIA_ENTRYPOINT = os.getenv("SEPOLIA_ENTRYPOINT")
-TEST_CONTRACT = os.getenv("TEST_CONTRACT", "../code/test_contract/Token_42_Base.sol")
+TEST_CONTRACT = os.getenv(
+    "TEST_CONTRACT", "../code/test_contract/Token_42_Base.sol"
+)
 MY_PRIVATE_KEY = os.getenv("MY_PRIVATE_KEY")
 MY_PUBLIC_KEY = os.getenv("MY_PUBLIC_KEY")
 SOLC_VERSION = "0.8.35"
@@ -130,7 +132,9 @@ class ContractState:
             )
             self.w3.eth.default_account = account.address
 
-            Contract = self.w3.eth.contract(abi=self.abi, bytecode=self.bytecode)
+            Contract = self.w3.eth.contract(
+                abi=self.abi, bytecode=self.bytecode
+            )
 
             tx_hash = Contract.constructor().transact()
             tx_receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash)
@@ -153,22 +157,35 @@ def build_status_table(state: ContractState) -> Table:
     table.add_column("Status", justify="center")
 
     def status_cell(ok: bool) -> str:
-        return "[bold green]✓ OK[/bold green]" if ok else "[bold red]✗ Pending[/bold red]"
+        return (
+            "[bold green]✓ OK[/bold green]"
+            if ok
+            else "[bold red]✗ Pending[/bold red]"
+        )
 
     table.add_row("1", "Connect to Sepolia node", status_cell(state.connected))
-    table.add_row("2", f"Install solc {SOLC_VERSION}", status_cell(state.compiler_installed))
+    table.add_row(
+        "2",
+        f"Install solc {SOLC_VERSION}",
+        status_cell(state.compiler_installed),
+    )
     table.add_row("3", f"Compile contract", status_cell(bool(state.bytecode)))
-    table.add_row("4", "Deploy contract", status_cell(bool(state.contract_address)))
+    table.add_row(
+        "4", "Deploy contract", status_cell(bool(state.contract_address))
+    )
 
     table.add_section()
     table.add_row("📂", "Contract Path", f"[cyan]{state.contract_path}[/cyan]")
-    table.add_row("👤", "Deployer", f"[cyan]{state.account_address or 'N/A'}[/cyan]")
+    table.add_row(
+        "👤", "Deployer", f"[cyan]{state.account_address or 'N/A'}[/cyan]"
+    )
 
     if state.contract_address:
         table.add_section()
         table.add_row(
-            "📜", "Contract Address",
-            f"[bold green]{state.contract_address}[/bold green]"
+            "📜",
+            "Contract Address",
+            f"[bold green]{state.contract_address}[/bold green]",
         )
         table.add_row("🔗", "Tx Hash", f"[green]{state.tx_hash}[/green]")
         table.add_row("⛽", "Gas Used", f"[white]{state.gas_used}[/white]")
@@ -267,7 +284,9 @@ def run_all(state: ContractState) -> str:
 
 def pass_init_checks() -> bool:
     if not is_virtual_env_sys():
-        console.print("[bold red]You are not running inside a virtual environment[/bold red]")
+        console.print(
+            "[bold red]You are not running inside a virtual environment[/bold red]"
+        )
         return False
     return True
 

@@ -1,17 +1,13 @@
-# Make shit run in the same shell instead of different shells
-
+.DEFAULT_GOAL := all
 SHELL := /bin/bash
-.ONESHELL:
 
-# 	Check if the current makefile does run in a python venv
+# Abort execution if there is NOT a virtual env
 check_venv:
-	@if [[ -z "$${VIRTUAL_ENV}" ]]; then\
-			echo "No venv acivated";\
-			exit;\
-	fi
-	echo "VENV ACTIVATED"
-# 	source ./p_env.sh master
-# 	bash -c "source ./.venv/bin/activate"
+	@[ -n "$$VIRTUAL_ENV" ] || { printf "No venv activated.\nRun: 'source ./p_env.sh master'\n"; exit 1;}
+
+# Abort execution if there is a virtual env 
+check_deactivate:
+	@[ -z "$$VIRTUAL_ENV" ] || { printf "❌ venv is active.\nRun: 'deactivate' before 'make clean'\n"; exit 1; }
 
 openzepellin: check_venv
 	echo "INSTALLING OPENZEPELLIN"
@@ -19,22 +15,15 @@ openzepellin: check_venv
 	npm install @openzeppelin/contracts
 	echo "OPENZEPELLIN INSTALLED"
 
-all: venv openzepellin
+all: check_venv openzepellin
 	echo "base requirements done"
 
-
-clean:
+clean: check_deactivate
 	rm -rf .venv
 	rm -rf .mypy_cache
 	rm -rf __pycache__
 	rm -rf node_modules
 
-
-
 re: clean all
 
-# Prune does removes volumes, including the DB.
-prune:
-	docker system prune --all --volumes --force
-
-.PHONY: venv
+.PHONY: check_venv check_deactivate openzepellin all clean re 

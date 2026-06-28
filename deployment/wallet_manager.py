@@ -22,13 +22,47 @@ SEPOLIA_ENTRYPOINT = os.getenv("SEPOLIA_ENTRYPOINT")
 
 console = Console()
 
+# Minimal ERC-20 ABI: only the functions wallet_manager actually uses.
+# balanceOf + decimals (read) for display; transfer (write) for Step 4.
+ERC20_ABI = [
+    {
+        "constant": True,
+        "inputs": [{"name": "_owner", "type": "address"}],
+        "name": "balanceOf",
+        "outputs": [{"name": "balance", "type": "uint256"}],
+        "type": "function",
+    },
+    {
+        "constant": True,
+        "inputs": [],
+        "name": "decimals",
+        "outputs": [{"name": "", "type": "uint8"}],
+        "type": "function",
+    },
+    {
+        "constant": False,
+        "inputs": [
+            {"name": "_to", "type": "address"},
+            {"name": "_value", "type": "uint256"},
+        ],
+        "name": "transfer",
+        "outputs": [{"name": "", "type": "bool"}],
+        "type": "function",
+    },
+]
+
 
 class Wallet:
     """
-    A class representing a cryptocurrency wallet.
+    A class representing a cryptocurrency wallet on Sepolia,
+    aware of a single ERC-20 token (T42).
     """
 
-    def __init__(self, key: str | None = None) -> None:
+    def __init__(
+        self,
+        contract_address: str,
+        key: str | None = None,
+    ) -> None:
 
         if not key:
             self.account = Account.create()
@@ -37,43 +71,77 @@ class Wallet:
 
         self._entrypoint_obj = Web3(Web3.HTTPProvider(SEPOLIA_ENTRYPOINT))
 
+        # Build the ERC-20 contract handle used for balance/transfer calls.
+        self._contract = self._entrypoint_obj.eth.contract(
+            address=contract_address,
+            abi=ERC20_ABI,
+        )
+
+        # Token decimals are fixed at deployment -> fetch once, cache it.
+        self._token_decimals: int = self._contract.functions.decimals().call()
+
         self._sepolia_balance_wei: int = self._fetch_balance()
+        self._token_balance_raw: int = self._fetch_token_balance()
 
     def _fetch_balance(self) -> int:
         """
-        Fetches the balance of the wallet in Wei.
+        Fetches the native (SepoliaETH) balance of the wallet in Wei.
 
         Returns:
             int: The balance in Wei.
         """
-        # web3.get_balance expects an Address/ChecksumAddress;
         checksum_addr = self._entrypoint_obj.to_checksum_address(
             self.get_public_key()
         )
         return self._entrypoint_obj.eth.get_balance(checksum_addr)
 
+    def _fetch_token_balance(self) -> int:
+        """
+        Fetches the T42 token balance of the wallet, in the token's
+        smallest unit (raw integer, before applying decimals).
+
+        Returns:
+            int: The token balance in its smallest unit.
+        """
+        checksum_addr = self._entrypoint_obj.to_checksum_address(
+            self.get_public_key()
+        )
+        return self._contract.functions.balanceOf(checksum_addr).call()
+
     def refresh_balance(self) -> None:
         """
-        Refreshes the balance of the wallet.
+        Refreshes BOTH the native and the token balance of the wallet.
 
         Returns:
             None
         """
         self._sepolia_balance_wei = self._fetch_balance()
+        self._token_balance_raw = self._fetch_token_balance()
 
     @property
     def sepolia_balance(self) -> float:
         """
-        Fetches the balance of the wallet in SepoliaETH.
+        The native balance of the wallet in SepoliaETH (human-readable).
 
         Returns:
             float: The balance in SepoliaETH.
         """
         return round((self._sepolia_balance_wei / 10**18), 4)
 
+    @property
+    def token_balance(self) -> float:
+        """
+        The T42 token balance of the wallet (human-readable),
+        scaled down by the token's decimals.
+
+        Returns:
+            float: The token balance in T42.
+        """
+        return round(self._token_balance_raw / 10**self._token_decimals, 4)
+
     def get_public_key(self) -> str:
         """
-        Fetches the public key of the wallet.
+        Fetches the public key (address) of the wallet.
 
         Returns:
             str: The public key.
@@ -90,17 +158,50 @@ class Wallet:
         return str(self.account.key.hex())
 
 
-def create_wallet(wallets: list[Wallet]) -> str:
+def load_contract_address() -> str:
+    """
+    Reads CONTRACT_ADDRESS from the environment and validates it.
+
+    Fails fast (exits the program) if:
+      - the variable is missing or empty
+      - the value is not a valid Ethereum address
+
+    Returns the checksummed address on success.
+    """
+    address = os.getenv("CONTRACT_ADDRESS")
+
+    # 1. Missing or empty -> the app cannot work without a deployed token.
+    if not address:
+        sys.exit(
+            "❌ CONTRACT_ADDRESS is not defined in your .env file.\n"
+            "   Deploy your token with contract_uploader.py first, "
+            "then add its address to .env:\n"
+            "   CONTRACT_ADDRESS=0x...."
+        )
+
+    # 2. Defined but malformed -> catch typos / truncated addresses early.
+    if not Web3.is_address(address):
+        sys.exit(
+            f"❌ CONTRACT_ADDRESS is defined but is not a valid "
+            f"Ethereum address:\n   '{address}'"
+        )
+
+    # Return checksummed form so all downstream calls are consistent.
+    return Web3.to_checksum_address(address)
+
+
+def create_wallet(wallets: list[Wallet], contract_address: str) -> str:
     """
     Creates a new wallet and adds it to the list.
 
     Args:
         wallets (list[Wallet]): The list of existing wallets.
+        contract_address (str): The deployed T42 contract address.
 
     Returns:
         str: A message indicating the result of the operation.
     """
-    new_wallet = Wallet()
+    new_wallet = Wallet(contract_address)
 
     if WALLETS_FILE is None:
         return "[red]WALLETS_FILE is not configured.[/red]"
@@ -199,16 +300,25 @@ def build_table(wallets: list[Wallet]) -> Table:
     table.add_column(
         "Balance (SepoliaETH)", style="green", min_width=18, justify="center"
     )
+    table.add_column(
+        "Balance (T42)", style="magenta", min_width=14, justify="center"
+    )
 
     if len(wallets) == 0:
         table.add_row(
             "",
             "[bold red]NO WALLET AVAILABLE.[/bold red]",
             "",
+            "",
         )
     else:
         for i, w in enumerate(wallets):
-            table.add_row(str(i), w.get_public_key(), str(w.sepolia_balance))
+            table.add_row(
+                str(i),
+                w.get_public_key(),
+                str(w.sepolia_balance),
+                str(w.token_balance),
+            )
     return table
 
 
@@ -280,6 +390,7 @@ def build_layout(
 
     return layout
 
+
 def ensure_wallets_file() -> None:
     """
     Ensures the wallets file (and its parent directory) exists.
@@ -297,12 +408,15 @@ def ensure_wallets_file() -> None:
             pass
 
 
-
-def load_wallets(wallets_file_path: str | None = None) -> list[Wallet]:
+def load_wallets(
+    contract_address: str,
+    wallets_file_path: str | None = None,
+) -> list[Wallet]:
     """
     Loads wallets from a file.
 
     Args:
+        contract_address (str): The deployed T42 contract address.
         wallets_file_path (str | None, optional): The path to the file
         containing wallet keys. Defaults to None.
 
@@ -313,11 +427,11 @@ def load_wallets(wallets_file_path: str | None = None) -> list[Wallet]:
 
     if wallets_file_path is None:
         return []  # No file path provided, return empty list
-    
+
     ensure_wallets_file()
 
     with open(wallets_file_path, "r", encoding="utf-8") as raw_keys:
-        # Strip '\n' from realines()
+        # Strip '\n' from readlines()
         unstriped_keys = raw_keys.readlines()
         keys = [k.strip("\n") for k in unstriped_keys]
         if len(keys) == 0:
@@ -325,7 +439,7 @@ def load_wallets(wallets_file_path: str | None = None) -> list[Wallet]:
 
         for key in keys:
             try:
-                w = Wallet(key)
+                w = Wallet(contract_address, key)
             except Exception as e:
                 print(f"Error in init wallets : {e}")
             else:
@@ -337,11 +451,15 @@ def main() -> None:
     """
     _Main function_
     """
+    load_dotenv()
+
+    contract_address = load_contract_address()
+
     status = ""
     # Buffer for user prompt
     buf = ""
     try:
-        wallets = load_wallets(WALLETS_FILE)
+        wallets = load_wallets(contract_address, WALLETS_FILE)
     except Exception as e:
         print(f"Error loading from {WALLETS_FILE}.\nError= {e}\nAborting")
         sys.exit(1)
@@ -363,7 +481,7 @@ def main() -> None:
                 cmd = buf.strip()
                 buf = ""
                 if cmd == "1":
-                    status = create_wallet(wallets)
+                    status = create_wallet(wallets, contract_address)
                 elif cmd == "2":
                     status = refresh_balance(wallets)
                 elif cmd == "3":

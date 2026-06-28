@@ -280,6 +280,23 @@ def build_layout(
 
     return layout
 
+def ensure_wallets_file() -> None:
+    """
+    Ensures the wallets file (and its parent directory) exists.
+    Creates an empty file if it does not.
+    """
+    if WALLETS_FILE is None:
+        return
+    # Create parent dir (e.g. wallets/) if missing
+    parent = os.path.dirname(WALLETS_FILE)
+    if parent:
+        os.makedirs(parent, exist_ok=True)
+    # Create empty file if missing, without truncating an existing one
+    if not os.path.exists(WALLETS_FILE):
+        with open(WALLETS_FILE, "w", encoding="utf-8"):
+            pass
+
+
 
 def load_wallets(wallets_file_path: str | None = None) -> list[Wallet]:
     """
@@ -296,6 +313,8 @@ def load_wallets(wallets_file_path: str | None = None) -> list[Wallet]:
 
     if wallets_file_path is None:
         return []  # No file path provided, return empty list
+    
+    ensure_wallets_file()
 
     with open(wallets_file_path, "r", encoding="utf-8") as raw_keys:
         # Strip '\n' from realines()

@@ -1,5 +1,10 @@
 # tokenizer
 
+## Mandatory from the subject
+Explain the choices we made for the project
+
+Explain which blockchain, expliquer le ERC20
+
 ## Deployment
 
 Run
@@ -14,6 +19,8 @@ Then run
 
 ```bash
 source ./p_env.sh master
+
+
 ```
 
 for installing python dependencies

@@ -1,15 +1,24 @@
 # tokenizer
 
-Deplying on `Sepolia`, the standard Etherum testnet, this project implements a simple ERC-20 token contract.
+## Deployment
 
-ETH blockchain has been choosen for history and wide adoption, and because of its robust smart contract capabilities. The ERC-20 standard is widely used for creating fungible tokens, making it an ideal choice for this project.
+Run
 
-## Find a public RCP to https://ethereum-sepolia-rpc.publicnode.com/
+```bash
+make
+```
 
-## BASE REQUIREMENTS
+This install openzepellin library for smart contract ERC20.
 
-- npm
-- python3
+Then run
+
+```bash
+source ./p_env.sh master
+```
+
+for installing python dependencies
+
+
 
 
 

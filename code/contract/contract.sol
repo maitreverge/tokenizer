@@ -11,20 +11,21 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
  * @dev    Inherits the full ERC20 standard. The entire initial supply is
  *         minted to the deployer, who can then distribute it to other wallets.
  */
-contract Token42 is ERC20 {
+contract UselessToken42 is ERC20 {
     /**
      * @notice Creates the token and mints the initial supply to the deployer.
      * @dev    `_mint` is called only once, in the constructor, so the supply
      *         is fixed at deployment (no inflation possible afterwards).
      *         Amount is expressed in the smallest unit (wei-like, 18 decimals).
      */
-    constructor() ERC20("Token42", "T42") {
+    constructor() ERC20("UselessToken42", "UT42") {
         // Mint 42 tokens (with 18 decimals) to whoever deploys the contract.
-        _mint(msg.sender, 42 * 10 ** decimals());
+        // We mint 10 ** 18 tokens, since every ERC-20 tokens is divisible by 18 zeros after the decimal.
+        _mint(msg.sender, 42 * (10 ** 18));
     }
 
     /**
-    * @notice Trivial view function used as a liveness/smoke-test:
+    * @notice Trivial view function used as a smoke-test:
     *         proves the deployed contract is reachable and responds to calls.
     * @return A constant greeting string.
     */

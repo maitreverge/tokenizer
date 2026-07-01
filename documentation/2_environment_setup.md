@@ -4,14 +4,16 @@ Before compiling and deploying the smart contract, you must configure your local
 
 ## 1. Local Dependencies
 
-As outlined in the main `README.md`, the project relies on a specific local setup to manage dependencies. Ensure you have run the following commands at the root of the repository:
+As outlined in the main `README.md`, the project relies on a specific local setup to manage dependencies. All of them are managed by the Dockerfile and `docker-compose.yml` configuration.
 
 ```bash
-# Installs the OpenZeppelin Solidity libraries via npm
-make
+# Build the Docker image
+docker compose build
+```
 
-# Creates a Python virtual environment and installs required Python packages
-source ./p_env.sh master
+```bash
+# Run the container and open a shell inside it
+docker compose run --rm tokenizer
 ```
 
 ## 2. Environment Configuration (.env)
@@ -30,20 +32,18 @@ Open the .env file and configure the following variables:
 
 - `SEPOLIA_ENTRYPOINT`: The RPC (Remote Procedure Call) URL used to communicate with the Sepolia blockchain.
   Default: A public node is provided, but it is highly recommended to create a free account on providers like Alchemy or Infura to get a reliable, private RPC URL.
-- `MY_PUBLIC_KEY`: Your Ethereum wallet address (e.g., 0x123...).
-- `MY_PRIVATE_KEY`: The private key associated with your public key. This is strictly required to locally sign the deployment transaction.
-
-⚠️ SECURITY WARNING: Never share your private key or commit the .env file to version control. Ensure your .gitignore is properly configured.
-
 - `SMART_CONTRACT_PATH`: The path to the Solidity file. Leave as default (../code/contract/contract.sol) unless you change the repository structure.
+- `WALLETS_FILE`: Path for the wallet manager to store generated wallets.
 - `CONTRACT_ADDRESS`: Leave this empty for now. You will populate this variable after successfully running the deployment script.
-- `WALLETS_FILE`: **(Optional)** Path for the wallet manager to store generated wallets.
+- `MY_PRIVATE_KEY`: The private key associated with your public key. This is strictly required to locally sign the deployment transaction.
+- `MY_PUBLIC_KEY`: Your Ethereum wallet address (e.g., 0x123...).
 
-**Optional: Insert a screenshot here showing a properly filled .env file (with a dummy private key) in your code editor**
 
 ## 3. Blockchain Prerequisites: Gas and Faucets
 
-Every operation that modifies the state of the blockchain (_like deploying a smart contract or transferring tokens_) requires a computation fee known as **Gas**. **Gas** is paid in the native currency of the network—in this case, _**Sepolia ETH**_.
+Every operation that modifies the state of the blockchain (_like deploying a smart contract or transferring tokens_) requires a computation fee known as **Gas**.
+
+**Gas** is paid in the native currency of the network—in this case, _**Sepolia ETH**_.
 
 To deploy `UselessToken42`, the wallet associated with `MY_PRIVATE_KEY` must have a positive balance of Sepolia ETH.
 
@@ -58,7 +58,5 @@ Since Sepolia is a testnet, ETH is free and distributed via "Faucets". You can r
 Enter your `MY_PUBLIC_KEY` address into one of these faucets to receive the test ETH.
 
 You can verify your balance by looking up your address on the Sepolia Etherscan Block Explorer.
-
-**[Optional: Insert a screenshot here of the Sepolia Etherscan page showing a successful faucet deposit to your test wallet]**
 
 Once your `.env` is configured and your wallet is funded, you are ready to deploy the contract.

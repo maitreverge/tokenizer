@@ -21,7 +21,7 @@ To deploy the contract, navigate to the root of the project and run:
 
 ```bash
 # Ensure your virtual environment is still active
-python code/deployment/deploy.py
+python3 deployment/contract_uploader.py
 ```
 
 (Note: Adjust the script path if your deployment script is named differently, such as main.py or located in another directory).
@@ -51,5 +51,3 @@ Saving this address is required for the interaction scripts (like transferring t
 You can verify that your contract is live on the blockchain by pasting your new `CONTRACT_ADDRESS` into the Sepolia Etherscan Block Explorer. 
 
 Here, you can see the token tracker, the total supply, and the initial mint transaction that sent all the tokens to your deployer wallet.
-
-**[Optional: Insert a screenshot here of the deployed contract page on Sepolia Etherscan]**

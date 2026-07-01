@@ -6,10 +6,8 @@ To make interacting with your tokens easy and intuitive, this repository include
 
 ## 1. Launching the Wallet Manager
 
-Ensure your Python virtual environment is active (via `source ./p_env.sh master`), then launch the interactive script:
-
 ```bash
-python wallet_manager.py
+python3 wallet_manager.py
 ```
 
 This script provides a command-line interface designed to give you complete, hands-on control over your token ecosystem.
@@ -17,10 +15,10 @@ This script provides a command-line interface designed to give you complete, han
 ## 2. Features overview
 
 The Wallet Manager includes several built-in features to test your token's functionality without needing to write custom scripts or use external platforms:
--  Generate Wallets on the Fly
+- Generate Wallets on the Fly
 
 You can instantly generate new Ethereum wallets directly from the interface. This is perfect for creating test accounts to simulate a real user base for your token.
--  Refresh & View Balances
+- Refresh & View Balances
 
 The manager connects seamlessly to the Sepolia blockchain to fetch real-time data. You can instantly check the balances of both:
 
@@ -30,6 +28,7 @@ Your Custom Token: To track who holds your newly created token.
 -  Manage Credentials
 
 The interface provides quick options to copy public addresses and private keys of the wallets you generate. 
+
 (Note: These are meant for testnet purposes. Do not use these generated wallets for real funds on the Ethereum Mainnet.)
 
 ## 3. Simulating Transactions (Next Steps)

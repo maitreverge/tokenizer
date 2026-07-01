@@ -28,12 +28,10 @@ Writing a secure smart contract from scratch is highly risky due to the immutabl
 * **Inheritance:** Our contract inherits from OpenZeppelin’s audited, battle-tested `ERC20.sol` implementation. This provides us with highly secure, optimized versions of standard functions (`transfer()`, `balanceOf()`, `approve()`, etc.) out of the box.
 * **Tokenomics:** The supply is hardcoded and fixed at deployment. In the constructor, we mint exactly 42 tokens (multiplied by $10^{18}$ to account for the standard 18 decimal places) directly to the deployer's address. No further inflation or minting is possible.
 
-*[Optional: Insert a screenshot here showing a snippet of `contract.sol`, specifically the constructor and inheritance]*
-
 ## 4. Deployment Tooling & Stack
 
 Rather than relying on heavy frameworks like Hardhat or Foundry, we opted for a custom, Python-driven deployment pipeline.
 
-* **Web3.py:** The core library used to connect to the Sepolia RPC node, read blockchain data, construct transactions, and sign them locally using the deployer's private key.
+* **web3.py:** The core library used to connect to the Sepolia RPC node, read blockchain data, construct transactions, and sign them locally using the deployer's private key.
 * **py-solc-x:** Used to dynamically compile the Solidity (`.sol`) smart contract into the ABI and EVM Bytecode required for deployment directly from the Python script.
 * **Rich:** Used to build a clean, responsive Terminal User Interface (TUI) that guides the user through the compilation and deployment lifecycle.

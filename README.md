@@ -9,7 +9,9 @@ The goal of this project is to create an `ERC-20` Smart Contract resulting in a 
 
 > [!TIP]
 > For ease of use and dependencies management, this projects has been containerized with `Docker` and `Docker Compose`.
+> 
 > Also, the container has been mounted with a volume to the host machine's.
+>
 > You can edit files on the host machine and the container will have access to them **without rebuilding the image**.
 
 The project demonstrates:

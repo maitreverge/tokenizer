@@ -84,7 +84,7 @@ MY_PUBLIC_KEY=
 ```
 
 
-4. **Build the Docker container (installs OpenZeppelin libraries):**
+4. **Build the Docker container:**
    ```bash
    docker compose build
    ```
@@ -101,7 +101,7 @@ MY_PUBLIC_KEY=
 Navigate to the deployment directory and run the contract uploader:
 
 ```bash
-python deployment/contract_uploader.py
+python3 contract_uploader.py
 ```
 
 The TUI will guide you through:
@@ -111,25 +111,42 @@ The TUI will guide you through:
 4. **Deploy contract** – Broadcast the deployment transaction
 5. **Call `helloWorld()`** – Test the deployed contract
 
+<p align="center">
+  <img src=".img/contract_uploader.png" width="100%"/>
+</p>
+
 ### Interacting with Tokens
+
+> [!NOTE]
+> This second part assumes that you have successfully deployed the Smart Contract and have the `CONTRACT_ADDRESS` filled in your `.env` file.
+
+Do do such, you can export the contract address from the TUI after deployment, or copy it from the `deployment/.env` file.
+
+```
+CONTRACT_ADDRESS=0xYourDeployedContractAddress
+```
+
+or
+
+```bash
+export CONTRACT_ADDRESS=0xYourDeployedContractAddress
+```
+
+> [!IMPORTANT]
+> The wallet manager is a separate tool which was not mandatory for the contract deployment. It is an additional utility to manage wallets and tokens, and allows you to interact with the deployed contract.
+
+---
 
 Launch the wallet manager to manage your token ecosystem:
 
 ```bash
-python deployment/wallet_manager.py
+python3 wallet_manager.py
 ```
 
 Features include:
 - **Generate Wallets**: Create new Ethereum wallets on the fly
 - **Check Balances**: View Sepolia ETH and custom token balances
 - **Copy Addresses**: Easily copy wallet addresses to clipboard
-- **Transfer Tokens**: Send tokens between wallets
-
-### Copying Deployment Info
-
-During deployment, you can copy contract details:
-- Type `adr` – Copy the deployed contract address
-- Type `tx` – Copy the transaction hash
 
 ## 🗂️ PROJECT STRUCTURE
 

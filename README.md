@@ -150,6 +150,10 @@ Features include:
 - **Check Balances**: View Sepolia ETH and custom token balances
 - **Copy Addresses**: Easily copy wallet addresses to clipboard
 
+<p align="center">
+  <img src=".img/wallet_manager.png" width="100%"/>
+</p>
+
 ## 🗂️ PROJECT STRUCTURE
 
 - **code/contract/**  

@@ -29,8 +29,8 @@ from utils import is_virtual_env_sys
 load_dotenv()
 
 SEPOLIA_ENTRYPOINT = os.getenv("SEPOLIA_ENTRYPOINT")
-SMART_CONTRACT = os.getenv(
-    "SMART_CONTRACT", "../code/contract/contract.sol"
+SMART_CONTRACT_PATH = os.getenv(
+    "SMART_CONTRACT_PATH", "../code/contract/contract.sol"
 )
 MY_PRIVATE_KEY = os.getenv("MY_PRIVATE_KEY")
 MY_PUBLIC_KEY = os.getenv("MY_PUBLIC_KEY")
@@ -48,7 +48,7 @@ class ContractState:
         self.w3: Web3 | None = None
         self.connected: bool = False
         self.compiler_installed: bool = False
-        self.contract_path: str = SMART_CONTRACT or ""
+        self.contract_path: str = SMART_CONTRACT_PATH or ""
         self.contract_source: str = ""
         # Application Binary interface => Used for front-end libraries
         self.abi = None

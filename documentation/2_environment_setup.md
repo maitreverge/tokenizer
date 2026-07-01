@@ -16,7 +16,7 @@ source ./p_env.sh master
 
 ## 2. Environment Configuration (.env)
 
-The deployment scripts rely on a `.env` file to securely load your credentials and network settings. 
+The deployment scripts rely on a `.env` file to securely load your credentials and network settings.
 
 Copy the provided template to create your configuration file:
 
@@ -29,15 +29,15 @@ cp deployment/.env.example deployment/.env
 Open the .env file and configure the following variables:
 
 - `SEPOLIA_ENTRYPOINT`: The RPC (Remote Procedure Call) URL used to communicate with the Sepolia blockchain.
-    Default: A public node is provided, but it is highly recommended to create a free account on providers like Alchemy or Infura to get a reliable, private RPC URL.
+  Default: A public node is provided, but it is highly recommended to create a free account on providers like Alchemy or Infura to get a reliable, private RPC URL.
 - `MY_PUBLIC_KEY`: Your Ethereum wallet address (e.g., 0x123...).
 - `MY_PRIVATE_KEY`: The private key associated with your public key. This is strictly required to locally sign the deployment transaction.
 
 ⚠️ SECURITY WARNING: Never share your private key or commit the .env file to version control. Ensure your .gitignore is properly configured.
 
-- `SMART_CONTRACT`: The path to the Solidity file. Leave as default (../code/contract/contract.sol) unless you change the repository structure.
+- `SMART_CONTRACT_PATH`: The path to the Solidity file. Leave as default (../code/contract/contract.sol) unless you change the repository structure.
 - `CONTRACT_ADDRESS`: Leave this empty for now. You will populate this variable after successfully running the deployment script.
-- `WALLETS_FILE`: __(Optional)__ Path for the wallet manager to store generated wallets.
+- `WALLETS_FILE`: **(Optional)** Path for the wallet manager to store generated wallets.
 
 **Optional: Insert a screenshot here showing a properly filled .env file (with a dummy private key) in your code editor**
 
@@ -48,6 +48,7 @@ Every operation that modifies the state of the blockchain (_like deploying a sma
 To deploy `UselessToken42`, the wallet associated with `MY_PRIVATE_KEY` must have a positive balance of Sepolia ETH.
 
 ### How to get Sepolia ETH:
+
 Since Sepolia is a testnet, ETH is free and distributed via "Faucets". You can request testnet funds from the following reliable sources:
 
 - Alchemy Sepolia Faucet (Requires an Alchemy account)

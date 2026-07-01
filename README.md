@@ -7,6 +7,8 @@
 `tokenizer` is an introduction to blockchain, Smart Contract and Token crafting.
 The goal of this project is to create an `ERC-20` Smart Contract resulting in a token creation on the Ethereum Sepolia testnet.
 
+For ease of use, this projects has been containerized with Docker and Docker Compose, and provides a clean Terminal User Interface (TUI) to deploy the contract and manage wallets.
+
 The project demonstrates:
 - **Smart Contract Development**: Creating a token using Solidity and the ERC-20 standard
 - **Secure Implementation**: Using OpenZeppelin's battle-tested libraries

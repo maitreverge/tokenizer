@@ -54,8 +54,7 @@ ERC20_ABI = [
 
 class Wallet:
     """
-    A class representing a cryptocurrency wallet on Sepolia,
-    aware of a single ERC-20 token (T42).
+    A class representing a cryptocurrency wallet on Sepolia
     """
 
     def __init__(
@@ -81,7 +80,7 @@ class Wallet:
         self._token_decimals: int = self._contract.functions.decimals().call()
 
         self._sepolia_balance_wei: int = self._fetch_balance()
-        self._token_balance_raw: int = self._fetch_token_balance()
+        self._my_token_balance_raw: int = self._fetch_my_token_balance()
 
     def _fetch_balance(self) -> int:
         """
@@ -95,9 +94,9 @@ class Wallet:
         )
         return self._entrypoint_obj.eth.get_balance(checksum_addr)
 
-    def _fetch_token_balance(self) -> int:
+    def _fetch_my_token_balance(self) -> int:
         """
-        Fetches the T42 token balance of the wallet, in the token's
+        Fetches the UT42 token balance of the wallet, in the token's
         smallest unit (raw integer, before applying decimals).
 
         Returns:
@@ -116,7 +115,7 @@ class Wallet:
             None
         """
         self._sepolia_balance_wei = self._fetch_balance()
-        self._token_balance_raw = self._fetch_token_balance()
+        self._my_token_balance_raw = self._fetch_my_token_balance()
 
     @property
     def sepolia_balance(self) -> float:
@@ -131,13 +130,13 @@ class Wallet:
     @property
     def token_balance(self) -> float:
         """
-        The T42 token balance of the wallet (human-readable),
+        The UT42 token balance of the wallet (human-readable),
         scaled down by the token's decimals.
 
         Returns:
-            float: The token balance in T42.
+            float: The token balance in UT42.
         """
-        return round(self._token_balance_raw / 10**self._token_decimals, 4)
+        return round(self._my_token_balance_raw / 10**self._token_decimals, 4)
 
     def get_public_key(self) -> str:
         """
@@ -170,7 +169,6 @@ def load_contract_address() -> str:
     """
     address = os.getenv("CONTRACT_ADDRESS")
 
-    # 1. Missing or empty -> the app cannot work without a deployed token.
     if not address:
         sys.exit(
             "❌ CONTRACT_ADDRESS is not defined in your .env file.\n"
@@ -179,14 +177,14 @@ def load_contract_address() -> str:
             "   CONTRACT_ADDRESS=0x...."
         )
 
-    # 2. Defined but malformed -> catch typos / truncated addresses early.
+    # in case of malformed address
     if not Web3.is_address(address):
         sys.exit(
             f"❌ CONTRACT_ADDRESS is defined but is not a valid "
             f"Ethereum address:\n   '{address}'"
         )
 
-    # Return checksummed form so all downstream calls are consistent.
+    # Return checksummed form
     return Web3.to_checksum_address(address)
 
 
@@ -196,7 +194,7 @@ def create_wallet(wallets: list[Wallet], contract_address: str) -> str:
 
     Args:
         wallets (list[Wallet]): The list of existing wallets.
-        contract_address (str): The deployed T42 contract address.
+        contract_address (str): The deployed UT42 contract address.
 
     Returns:
         str: A message indicating the result of the operation.
@@ -301,7 +299,7 @@ def build_table(wallets: list[Wallet]) -> Table:
         "Balance (SepoliaETH)", style="green", min_width=18, justify="center"
     )
     table.add_column(
-        "Balance (T42)", style="magenta", min_width=14, justify="center"
+        "Balance (UT42)", style="magenta", min_width=14, justify="center"
     )
 
     if len(wallets) == 0:
@@ -375,7 +373,7 @@ def build_layout(
     # Return message from commands
     if status_msg:
         menu_text.append("  → ", style="dim")
-        menu_text.append_text(Text.from_markup(status_msg))
+        menu_text.append_text(Text.from_markup(status_msg)) # !!!!
         menu_text.append("\n\n")
 
     menu_text.append("  > ", style="bold white")
@@ -416,7 +414,7 @@ def load_wallets(
     Loads wallets from a file.
 
     Args:
-        contract_address (str): The deployed T42 contract address.
+        contract_address (str): The deployed UT42 contract address.
         wallets_file_path (str | None, optional): The path to the file
         containing wallet keys. Defaults to None.
 

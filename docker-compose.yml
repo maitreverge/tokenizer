@@ -5,16 +5,13 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile
-    container_name: tokenizer_flverge
+    container_name: tokenizer_app
     env_file:
       - ./deployment/.env
-    # Required to keep the terminal open for your TUI and readchar inputs
     stdin_open: true
     tty: true
-    # Mounted project so we don't need to rebuild
+    # Mounting file without having to rebuild the container
     volumes:
-      - ./code:/app/code
-      - ./deployment:/app/deployment
-      # Prevent overwriting the container's installed node_modules and venv
+      - .:/app # mount all the app
       - /app/deployment/node_modules
       - /app/.venv

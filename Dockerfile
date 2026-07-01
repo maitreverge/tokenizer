@@ -1,10 +1,9 @@
 FROM python:3.11-slim
 
-# Install system dependencies: Node.js (for OpenZeppelin), npm, and make
-RUN apt-get update && \
-    apt-get install -y nodejs npm make && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+RUN apt-get update
+RUN apt-get install -y nodejs npm make
+RUN apt-get clean
+RUN rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
@@ -25,5 +24,5 @@ RUN pip install --no-cache-dir --upgrade pip && \
 
 WORKDIR /app/deployment
 
-# The TUI requires an interactive terminal, we set the default command
-CMD ["python", "contract_uploader.py"]
+# Run bash as entrypoint
+CMD ["/bin/bash"]

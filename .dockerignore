@@ -1,21 +1,12 @@
-# Git
 .git
 .gitignore
-
-# Python
 __pycache__/
 *.py[cod]
 .mypy_cache/
 .venv/
 venv/
-
-# Node
 node_modules/
 package-lock.json
-
-# Environment/Secrets
 deployment/.env
 deployment/wallets/wallets.txt
-
-# Repomix output
 repomix-output.xml

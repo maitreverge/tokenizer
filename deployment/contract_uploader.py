@@ -331,8 +331,12 @@ def copy_address(state: ContractState) -> str:
     """
     if not state.contract_address:
         return "[bold red]❌ No contract address available[/bold red]"
-    clipboard_cpy(state.contract_address)
-    return "[bold green]✓ Contract address copied[/bold green]"
+    try:
+        clipboard_cpy(state.contract_address)
+        return "[bold green]✓ Contract address copied[/bold green]"
+    except Exception:
+        # Fallback for Docker/Headless environments
+        return f"[bold yellow]Manual Copy:[/bold yellow] {state.contract_address}"
 
 
 def copy_tx(state: ContractState) -> str:
@@ -341,8 +345,12 @@ def copy_tx(state: ContractState) -> str:
     """
     if not state.tx_hash:
         return "[bold red]❌ No transaction hash available[/bold red]"
-    clipboard_cpy(state.tx_hash)
-    return "[bold green]✓ Transaction hash copied[/bold green]"
+    try:
+        clipboard_cpy(state.tx_hash)
+        return "[bold green]✓ Transaction hash copied[/bold green]"
+    except Exception:
+        # Fallback for Docker/Headless environments
+        return f"[bold yellow]Manual Copy:[/bold yellow] {state.tx_hash}"
 
 
 def run_all(state: ContractState) -> str:

@@ -238,16 +238,23 @@ def copy_adress(wallets: list[Wallet], cmd: str) -> str:
     """
     nb_wallets = len(wallets)
 
-    cmd, _index = cmd.split("-")
-
     try:
+        cmd, _index = cmd.split("-")
         index = int(_index)
         if index not in range(nb_wallets):
             return "[bold red]❌ Selected Wallet does not exist [/bold red]"
-        clipboard_cpy(wallets[index].get_public_key())
     except Exception as e:
-        return f"[bold red]❌ Error in copy adress : {e} [/bold red]"
-    return f"[bold green]✓ Wallet's adress `{index}` copied [/bold green]"
+        return f"[bold red]❌ Invalid command format: {e} [/bold red]"
+
+    wallet_address = wallets[index].get_public_key()
+
+    # Attempt the clipboard copy, fallback to manual copy
+    try:
+        clipboard_cpy(wallet_address)
+        return f"[bold green]✓ Wallet's address `{index}` copied [/bold green]"
+    except Exception:
+        return f"[bold yellow]Manual Copy (Wallet {index}):[/bold yellow] {wallet_address}"
+
 
 
 def copy_key(wallets: list[Wallet], cmd: str) -> str:
@@ -263,16 +270,23 @@ def copy_key(wallets: list[Wallet], cmd: str) -> str:
     """
     nb_wallets = len(wallets)
 
-    cmd, _index = cmd.split("-")
-
     try:
+        cmd, _index = cmd.split("-")
         index = int(_index)
         if index not in range(nb_wallets):
             return "[bold red]❌ Selected Wallet does not exist [/bold red]"
-        clipboard_cpy(wallets[index].get_private_key())
     except Exception as e:
-        return f"[bold red]❌ Error in copy key : {e} [/bold red]"
-    return f"[bold green]✓ Wallet's private key `{index}` copied [/bold green]"
+        return f"[bold red]❌ Invalid command format: {e} [/bold red]"
+
+    private_key = wallets[index].get_private_key()
+
+    # Attempt the clipboard copy, fallback to manual copy
+    try:
+        clipboard_cpy(private_key)
+        return f"[bold green]✓ Wallet's private key `{index}` copied [/bold green]"
+    except Exception:
+        return f"[bold yellow]Manual Copy (Private Key {index}):[/bold yellow] {private_key}"
+
 
 
 def build_table(wallets: list[Wallet]) -> Table:

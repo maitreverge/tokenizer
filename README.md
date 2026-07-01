@@ -20,6 +20,11 @@ The project demonstrates:
 - **Python-Driven Deployment**: A custom deployment pipeline using `web3.py`, `py-solc-x`, and `Rich` for a clean TUI
 - **Wallet Management**: Interactive tools to generate wallets and manage tokens on-chain
 
+> [!IMPORTANT]
+> A blockchain and smart contract introduction is essential to understand the concepts behind this project.
+>
+> A PDF document is provided in the `documentation/0_intro.pdf`. It covers the basics of blockchain, Smart Contracts, and the ERC-20 token standard. 
+
 ## ✨ FEATURES
 
 Key features of `tokenizer` include:

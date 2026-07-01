@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  tokenizer:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: tokenizer_flverge
+    env_file:
+      - ./deployment/.env
+    # Required to keep the terminal open for your TUI and readchar inputs
+    stdin_open: true
+    tty: true
+    # Mounted project so we don't need to rebuild
+    volumes:
+      - ./code:/app/code
+      - ./deployment:/app/deployment
+      # Prevent overwriting the container's installed node_modules and venv
+      - /app/deployment/node_modules
+      - /app/.venv

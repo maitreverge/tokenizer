@@ -1,20 +1,24 @@
 FROM python:3.11-slim
 
 RUN apt-get update
-RUN apt-get install -y nodejs npm make
+RUN apt-get install -y nodejs npm
 RUN apt-get clean
 RUN rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-COPY deployment/package.json deployment/Makefile ./deployment/
+COPY deployment/package.json ./deployment/
 
 WORKDIR /app/deployment
-RUN make openzepellin
+
+# Init openzepellin
+RUN npm init -y
+RUN npm install @openzeppelin/contracts
 
 WORKDIR /app
 COPY . .
 
+# Init virtual env + install pip dependencies
 ENV VIRTUAL_ENV=/app/.venv
 RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"

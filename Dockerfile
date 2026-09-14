@@ -1,7 +1,7 @@
 FROM python:3.11-slim
 
 RUN apt-get update
-RUN apt-get install -y nodejs npm
+RUN apt-get install -y nodejs npm vim
 RUN apt-get clean
 RUN rm -rf /var/lib/apt/lists/*
 

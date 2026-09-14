@@ -2,6 +2,12 @@
   <img src=".img/tokenizer.png" width="70%"/>
 </p>
 
+> [!IMPORTANT]
+> **Deployment for evaluation**
+> - **Network:** Ethereum Sepolia (testnet)
+> - **Token:** UselessToken42 (`UT42`)
+> - No contract address is published here: the contract is deployed live during the evaluation, using a wallet whose credentials are handed to the corrector at that time (see `deployment/.env.example`). This lets the evaluator witness the full deployment flow described below rather than just trusting a pre-existing address.
+
 ## 🚀 SYNOPSIS
 
 `tokenizer` is an introduction to blockchain, Smart Contract and Token crafting.

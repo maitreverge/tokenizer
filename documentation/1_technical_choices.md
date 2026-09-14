@@ -28,7 +28,22 @@ Writing a secure smart contract from scratch is highly risky due to the immutabl
 * **Inheritance:** Our contract inherits from OpenZeppelin’s audited, battle-tested `ERC20.sol` implementation. This provides us with highly secure, optimized versions of standard functions (`transfer()`, `balanceOf()`, `approve()`, etc.) out of the box.
 * **Tokenomics:** The supply is hardcoded and fixed at deployment. In the constructor, we mint exactly 42 tokens (multiplied by $10^{18}$ to account for the standard 18 decimal places) directly to the deployer's address. No further inflation or minting is possible.
 
-## 4. Deployment Tooling & Stack
+## 4. Deployment Timing: Why No Address Is Published Here
+
+This repository intentionally does not hard-code or publish a deployed contract address. The wallet credentials used to pay for gas and deploy `UselessToken42` are handed to the corrector directly during the evaluation, and the contract is deployed live at that time using the TUI described in `3_deployment_guide.md`. This ensures the evaluator observes the actual compile-and-deploy process end-to-end, instead of only verifying a contract that already exists on-chain.
+
+## 5. Security: Ownership & Privileges
+
+`UselessToken42` deliberately has **no owner and no privileged role**. The contract does not inherit `Ownable`, and it does not expose `mint()`, `pause()`, `blacklist()`, or any other admin-gated function beyond what the plain OpenZeppelin `ERC20` implementation already provides.
+
+**Why no admin controls?**
+* **No privileged actor to compromise:** since there is no owner key, there is nothing an attacker (or a careless deployer) can abuse to mint extra supply, freeze balances, or rug-pull holders.
+* **Trust minimization:** holders only need to trust the immutable, audited OpenZeppelin `ERC20` logic — not a human with special rights over the contract.
+* **Matches the fixed-supply design:** since the entire 42-token supply is minted once in the constructor, there is no legitimate future need for a minting privilege, so the attack surface is simply removed rather than access-controlled.
+
+The trade-off is that this also means **no recovery mechanism** exists (no pause, no blacklist, no upgrade path) — a deliberate choice appropriate for a fixed-supply demo token, but one that would need revisiting for a production asset with regulatory or operational requirements.
+
+## 6. Deployment Tooling & Stack
 
 Rather than relying on heavy frameworks like Hardhat or Foundry, we opted for a custom, Python-driven deployment pipeline.
 

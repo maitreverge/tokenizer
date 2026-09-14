@@ -8,3 +8,4 @@ deployment/.env
 deployment/wallet_manager.py
 repomix-output.xml
 deployment/wallets/wallets.txt
+en.subject.pdf

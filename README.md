@@ -131,6 +131,7 @@ The TUI will guide you through:
 
 > [!NOTE]
 > This second part assumes that you have successfully deployed the Smart Contract and have the `CONTRACT_ADDRESS` filled in your `.env` file.
+> 
 
 Do do such, you can export the contract address from the TUI after deployment, or copy it from the `deployment/.env` file.
 
@@ -143,6 +144,14 @@ or
 ```bash
 export CONTRACT_ADDRESS=0xYourDeployedContractAddress
 ```
+
+> [!TIP]
+> If `CONTRACT_ADDRESS` is missing from your `.env` file, `wallet_manager.py` will detect it automatically and prompt you to enter it directly in the TUI, no need to edit the `.env` file by hand.
+
+<p align="center">
+  <img src=".img/missing_contract_address.png" width="100%"/>
+</p>
+
 
 > [!IMPORTANT]
 > The wallet manager is a separate tool which was not mandatory for the contract deployment. It is an additional utility to manage wallets and tokens, and allows you to interact with the deployed contract.

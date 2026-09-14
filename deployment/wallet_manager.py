@@ -10,7 +10,7 @@ from rich import box
 from rich.live import Live
 from rich.layout import Layout
 
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv, set_key
 from web3 import Web3
 from pyperclip import copy as clipboard_cpy
 from eth_account import Account
@@ -155,6 +155,31 @@ class Wallet:
             str: The private key.
         """
         return str(self.account.key.hex())
+
+
+def ensure_contract_address_env() -> None:
+    """
+    If CONTRACT_ADDRESS is missing from the environment, warns the user,
+    prompts them for it, writes it to the .env file, then restarts the
+    script so the new value is picked up.
+    """
+    if os.getenv("CONTRACT_ADDRESS"):
+        return
+
+    console.print(
+        "[bold yellow]⚠ CONTRACT_ADDRESS is not set in your .env file.[/bold yellow]"
+    )
+    console.print(
+        "Deploy your token with contract_uploader.py first if you haven't, "
+        "then enter its address below."
+    )
+    address = console.input("[bold cyan]Contract address: [/bold cyan]").strip()
+
+    env_path = find_dotenv() or os.path.join(os.path.dirname(__file__), ".env")
+    set_key(env_path, "CONTRACT_ADDRESS", address, quote_mode="never")
+
+    console.print("[bold green]✓ Saved to .env. Please restart the program.[/bold green]")
+    sys.exit(0)
 
 
 def load_contract_address() -> str:
@@ -465,6 +490,7 @@ def main() -> None:
     """
     load_dotenv()
 
+    ensure_contract_address_env()
     contract_address = load_contract_address()
 
     status = ""

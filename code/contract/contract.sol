@@ -6,7 +6,7 @@ pragma solidity ^0.8.35;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 /**
- * @title Token42
+ * @title UselessToken42
  * @notice A simple ERC-20 token created for the 42 Tokenizer project.
  * @dev    Inherits the full ERC20 standard. The entire initial supply is
  *         minted to the deployer, who can then distribute it to other wallets.
@@ -30,6 +30,6 @@ contract UselessToken42 is ERC20 {
     * @return A constant greeting string.
     */
     function helloWorld() external pure returns (string memory) {
-        return "Hello, World!";
+        return "Hello, World!"; // You can modify this string before deploying your own token, if you like.
     }
 }

@@ -68,6 +68,7 @@ class Wallet:
         else:
             self.account = Account.from_key(key)
 
+        # Entrypoint to the Sepolia testnet, used for balance and transfer calls.
         self._entrypoint_obj = Web3(Web3.HTTPProvider(SEPOLIA_ENTRYPOINT))
 
         # Build the ERC-20 contract handle used for balance/transfer calls.
@@ -176,6 +177,8 @@ def ensure_contract_address_env() -> None:
     address = console.input("[bold cyan]Contract address: [/bold cyan]").strip()
 
     env_path = find_dotenv() or os.path.join(os.path.dirname(__file__), ".env")
+
+    # quote_mode="never" ensures the address is written without quotes.
     set_key(env_path, "CONTRACT_ADDRESS", address, quote_mode="never")
 
     console.print("[bold green]✓ Saved to .env. Please restart the program.[/bold green]")
@@ -395,7 +398,7 @@ def build_layout(
     menu_text.append(". Create a wallet\n", style="white")
     menu_text.append("  2", style="bold yellow")
     menu_text.append(". Refresh Wallets balances\n", style="white")
-    menu_text.append("  3", style="bold yellow")
+    menu_text.append("  q", style="bold yellow")
     menu_text.append(". Quit Program\n\n", style="white")
 
     # ! Copy commands
@@ -522,7 +525,7 @@ def main() -> None:
                     status = create_wallet(wallets, contract_address)
                 elif cmd == "2":
                     status = refresh_balance(wallets)
-                elif cmd == "3":
+                elif cmd == "q":
                     break
                 elif cmd.startswith("adr-"):
                     status = copy_adress(wallets, cmd)

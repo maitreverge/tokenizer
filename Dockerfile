@@ -11,9 +11,8 @@ COPY deployment/package.json ./deployment/
 
 WORKDIR /app/deployment
 
-# Init openzepellin
-RUN npm init -y
-RUN npm install @openzeppelin/contracts
+# Install pinned dependencies from package.json
+RUN npm install
 
 WORKDIR /app
 COPY . .

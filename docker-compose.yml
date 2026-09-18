@@ -5,10 +5,9 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile
-    container_name: tokenizer_app
-    env_file:
-      - ./deployment/.env
-    stdin_open: true
+    # env_file:
+    #   - ./deployment/.env
+    stdin_open: true # keep STDIN open and allocate a TTY, needed for the interactive TUI
     tty: true
     # Mounting file without having to rebuild the container
     volumes:
